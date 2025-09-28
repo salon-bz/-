@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stiled - Servicios de Estilismo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #ff4da6, #ff66cc);
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 0 20px #ff4da6;
+    }
+
+    /* Modal personalizado */
+    .modal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: #ff1493;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 25px #ff4da6, 0 0 50px #ff1aff, 0 0 75px #ff66cc;
+      animation: neonGlow 1.5s infinite alternate;
+    }
+    .modal-content h2 {
+      margin: 0 0 15px;
+      font-size: 22px;
+    }
+    .modal-content button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: white;
+      color: #ff1493;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .modal-content button:hover {
+      background: #ff4da6;
+      color: white;
+      box-shadow: 0 0 15px #fff;
+    }
+    @keyframes neonGlow {
+      from { box-shadow: 0 0 20px #ff4da6, 0 0 40px #ff1aff; }
+      to { box-shadow: 0 0 30px #ff66cc, 0 0 60px #ff4da6; }
+    }
+
+    /* Servicios */
+    #services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .service {
+      background: #222;
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(255,20,147,0.4);
+      transition: transform 0.3s;
+    }
+    .service:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255,20,147,0.8);
+    }
+    .service img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .service button {
+      background: #ff1493;
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .service button:hover {
+      background: #ff66cc;
+      box-shadow: 0 0 10px #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>𝐁𝐄𝐀𝐔𝐓𝐘 𝐀𝐋𝐋&𝐙𝐀
+
+</header>
+
+  <!-- Modal de bienvenida -->
+  <div id="welcomeModal" class="modal">
+    <div class="modal-content">
+      <h2>🌸 Aquí encontrarás mis servicios disponibles 🌸</h2>
+      <p>Incluyendo toda la información y mis horarios disponibles.</p>
+      <button onclick="cerrarModal()">Continuar</button>
+    </div>
+  </div>
+
+  <!-- Lista de servicios -->
+  <section id="services"></section>
+
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    // Configuración Firebase nueva
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkaKp-nUwDb4O-UlLfbwuOoYSsOcwLw54",
+      authDomain: "stilod-6e486.firebaseapp.com",
+      projectId: "stilod-6e486",
+      storageBucket: "stilod-6e486.firebasestorage.app",
+      messagingSenderId: "141492601635",
+      appId: "1:141492601635:web:ae08e8f7b479b795a6c296"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Cerrar modal
+    function cerrarModal() {
+      document.getElementById('welcomeModal').style.display = 'none';
+    }
+    window.cerrarModal = cerrarModal;
+
+    // Mostrar servicios desde Firestore
+    async function cargarServicios() {
+      const contenedor = document.getElementById("services");
+      const querySnapshot = await getDocs(collection(db, "services"));
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.classList.add("service");
+        div.innerHTML = `
+          <img src="${data.image}" alt="${data.title}">
+          <h3>${data.title}</h3>
+          <p>💲 ${data.price} COP</p>
+          <button onclick="verHorarios('${doc.id}', '${data.title}')">𝐕𝐄𝐑 𝐇𝐎𝐑𝐀𝐑𝐈𝐎𝐒 𝐃𝐈𝐒𝐏𝐎𝐍𝐈𝐁𝐋𝐄𝐒</button>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+    cargarServicios();
+
+    // Ver horarios
+    async function verHorarios(serviceId, titulo) {
+      const horariosSnap = await getDocs(collection(db, `services/${serviceId}/schedules`));
+      let horarios = [];
+      horariosSnap.forEach(h => horarios.push(h.data().hora));
+
+      let opciones = horarios.map(h => `<button onclick="reservar('${titulo}','${h}')">${h}</button>`).join("<br>");
+      document.body.innerHTML += `
+        <div class="modal" id="horariosModal">
+          <div class="modal-content">
+            <h2>Horarios para ${titulo}</h2>
+            ${opciones}
+            <button onclick="cerrarHorarios()">Cerrar</button>
+          </div>
+        </div>`;
+    }
+    window.verHorarios = verHorarios;
+
+    function cerrarHorarios() {
+      document.getElementById("horariosModal").remove();
+    }
+    window.cerrarHorarios = cerrarHorarios;
+
+    function reservar(titulo, horario) {
+      const numero = "+573209964317";
+      const mensaje = encodeURIComponent(`Me interesa el servicio: ${titulo}. Quiero reservar para ${horario}. ¿Estarás disponible?`);
+      window.open(`https://wa.me/${numero}?text=${mensaje}`, "_blank");
+    }
+    window.reservar = reservar;
+  </script>
+</body>
+</html>
