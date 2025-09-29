@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stiled - Servicios de Estilismo</title>
   <style>
@@ -9,21 +9,42 @@
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background: #111;
+      background: #000;
       color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Canvas estrellas */
+    #starsCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: #000;
     }
 
     header {
       text-align: center;
-      padding: 20px;
-      background: linear-gradient(135deg, #ff4da6, #ff66cc);
+      padding: 30px 20px 10px;
+      background: transparent;
       color: white;
-      font-size: 24px;
+    }
+    header img {
+      width: 120px;
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255,255,255,0.6);
+    }
+    header h1 {
+      font-size: 28px;
       font-weight: bold;
-      box-shadow: 0 0 20px #ff4da6;
+      margin: 10px 0 0;
+      text-shadow: 0 0 10px #ff66cc;
     }
 
-    /* Modal personalizado */
+    /* Modal */
     .modal {
       display: flex;
       align-items: center;
@@ -36,12 +57,12 @@
       backdrop-filter: blur(4px);
     }
     .modal-content {
-      background: #ff1493;
+      background: #222;
       padding: 20px;
       border-radius: 15px;
       text-align: center;
       color: white;
-      box-shadow: 0 0 25px #ff4da6, 0 0 50px #ff1aff, 0 0 75px #ff66cc;
+      box-shadow: 0 0 25px #ff66cc, 0 0 40px #ff1493;
       animation: neonGlow 1.5s infinite alternate;
     }
     .modal-content h2 {
@@ -53,20 +74,19 @@
       padding: 10px 20px;
       border: none;
       border-radius: 10px;
-      background: white;
-      color: #ff1493;
+      background: #ff1493;
+      color: white;
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
     }
     .modal-content button:hover {
-      background: #ff4da6;
-      color: white;
+      background: #ff66cc;
       box-shadow: 0 0 15px #fff;
     }
     @keyframes neonGlow {
-      from { box-shadow: 0 0 20px #ff4da6, 0 0 40px #ff1aff; }
-      to { box-shadow: 0 0 30px #ff66cc, 0 0 60px #ff4da6; }
+      from { box-shadow: 0 0 15px #ff4da6, 0 0 30px #ff1aff; }
+      to { box-shadow: 0 0 25px #ff66cc, 0 0 40px #ff4da6; }
     }
 
     /* Servicios */
@@ -77,16 +97,16 @@
       padding: 20px;
     }
     .service {
-      background: #222;
+      background: rgba(30,30,30,0.9);
       border-radius: 15px;
       padding: 15px;
       text-align: center;
-      box-shadow: 0 0 10px rgba(255,20,147,0.4);
+      box-shadow: 0 0 10px rgba(255,20,147,0.3);
       transition: transform 0.3s;
     }
     .service:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255,20,147,0.8);
+      box-shadow: 0 0 20px rgba(255,20,147,0.7);
     }
     .service img {
       width: 100%;
@@ -106,15 +126,70 @@
       background: #ff66cc;
       box-shadow: 0 0 10px #fff;
     }
+
+    /* Horarios modal */
+    #horariosModal .modal-content {
+      background: #111; /* fondo oscuro distinto */
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 20px #ff66cc, 0 0 35px #ff1493;
+    }
+
+    #horariosModal h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #ff99cc; /* título en rosado claro */
+      text-shadow: 0 0 8px #ff66cc;
+    }
+
+    #horariosModal button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* Botones de horarios */
+    #horariosModal .horario-btn {
+      background: #ff66cc; /* rosado suave */
+      color: #fff;
+    }
+
+    #horariosModal .horario-btn:hover {
+      background: #ff99cc;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    /* Botón cerrar */
+    #horariosModal .cerrar-btn {
+      background: #ff1493; /* rosado intenso */
+      color: #fff;
+      margin-top: 15px;
+    }
+
+    #horariosModal .cerrar-btn:hover {
+      background: #ff4da6;
+      box-shadow: 0 0 12px #fff;
+    }
   </style>
 </head>
 <body>
-  <header>𝐁𝐄𝐀𝐔𝐓𝐘 𝐀𝐋𝐋&𝐙𝐀
+  <!-- Fondo estrellas -->
+  <canvas id="starsCanvas"></canvas>
 
-</header>
+  <!-- Header con logo dinámico -->
+  <header>
+    <img id="logo" src="" alt="Logo">
+    <h1>𝐁𝐄𝐀𝐔𝐓𝐘 𝐀𝐋𝐋&amp;𝐙𝐀</h1>
+  </header>
 
-  <!-- Modal de bienvenida -->
-  <div id="welcomeModal" class="modal">
+  <!-- Modal bienvenida -->
+  <div id="welcomeModal" class="modal" style="display: none;">
     <div class="modal-content">
       <h2>🌸 Aquí encontrarás mis servicios disponibles 🌸</h2>
       <p>Incluyendo toda la información y mis horarios disponibles.</p>
@@ -122,15 +197,13 @@
     </div>
   </div>
 
-  <!-- Lista de servicios -->
+  <!-- Servicios -->
   <section id="services"></section>
 
   <script type="module">
-    // Importar Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // Configuración Firebase nueva
     const firebaseConfig = {
       apiKey: "AIzaSyAkaKp-nUwDb4O-UlLfbwuOoYSsOcwLw54",
       authDomain: "stilod-6e486.firebaseapp.com",
@@ -143,13 +216,23 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Cerrar modal
+    // Modal
     function cerrarModal() {
       document.getElementById('welcomeModal').style.display = 'none';
     }
     window.cerrarModal = cerrarModal;
 
-    // Mostrar servicios desde Firestore
+    // Logo desde Firestore (colección config/logo)
+    async function cargarLogo() {
+      const docRef = doc(db, "config", "logo");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        document.getElementById("logo").src = docSnap.data().url;
+      }
+    }
+    cargarLogo();
+
+    // Servicios
     async function cargarServicios() {
       const contenedor = document.getElementById("services");
       const querySnapshot = await getDocs(collection(db, "services"));
@@ -161,26 +244,27 @@
           <img src="${data.image}" alt="${data.title}">
           <h3>${data.title}</h3>
           <p>💲 ${data.price} COP</p>
-          <button onclick="verHorarios('${doc.id}', '${data.title}')">𝐕𝐄𝐑 𝐇𝐎𝐑𝐀𝐑𝐈𝐎𝐒 𝐃𝐈𝐒𝐏𝐎𝐍𝐈𝐁𝐋𝐄𝐒</button>
+          <button onclick="verHorarios('${doc.id}', '${data.title}')">𝐕𝐄𝐑 𝐇𝐎𝐑𝐀𝐑𝐈𝐎𝐒</button>
         `;
         contenedor.appendChild(div);
       });
     }
     cargarServicios();
 
-    // Ver horarios
     async function verHorarios(serviceId, titulo) {
       const horariosSnap = await getDocs(collection(db, `services/${serviceId}/schedules`));
       let horarios = [];
       horariosSnap.forEach(h => horarios.push(h.data().hora));
 
-      let opciones = horarios.map(h => `<button onclick="reservar('${titulo}','${h}')">${h}</button>`).join("<br>");
+      let opciones = horarios.map(h => `<button class="horario-btn" onclick="reservar('${titulo}','${h}')">${h}</button>`).join("<br>");
+
       document.body.innerHTML += `
         <div class="modal" id="horariosModal">
           <div class="modal-content">
             <h2>Horarios para ${titulo}</h2>
             ${opciones}
-            <button onclick="cerrarHorarios()">Cerrar</button>
+            <br>
+            <button class="cerrar-btn" onclick="cerrarHorarios()">Cerrar</button>
           </div>
         </div>`;
     }
@@ -197,6 +281,52 @@
       window.open(`https://wa.me/${numero}?text=${mensaje}`, "_blank");
     }
     window.reservar = reservar;
+
+    // Efecto estrellas
+    const canvas = document.getElementById("starsCanvas");
+    const ctx = canvas.getContext("2d");
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = Array.from({length: 150}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2,
+        d: Math.random() * 1
+      }));
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      moveStars();
+    }
+
+    function moveStars() {
+      stars.forEach(s => {
+        s.y += s.d;
+        if (s.y > canvas.height) {
+          s.y = 0;
+          s.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    function animateStars() {
+      drawStars();
+      requestAnimationFrame(animateStars);
+    }
+
+    resizeCanvas();
+    animateStars();
+    window.addEventListener("resize", resizeCanvas);
   </script>
 </body>
 </html>
