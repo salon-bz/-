@@ -95,6 +95,7 @@
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
       padding: 20px;
+      align-items: start; /* cajas se adaptan al contenido */
     }
     .service {
       background: rgba(30,30,30,0.9);
@@ -103,13 +104,18 @@
       text-align: center;
       box-shadow: 0 0 10px rgba(255,20,147,0.3);
       transition: transform 0.3s;
+      height: auto;         /* altura adaptable */
+      display: block;       /* evita estiramiento */
     }
     .service:hover {
       transform: scale(1.05);
       box-shadow: 0 0 20px rgba(255,20,147,0.7);
     }
+    /* 🔹 Imagen uniforme */
     .service img {
-      width: 100%;
+      width: 100%;          /* ancho del contenedor */
+      height: 200px;        /* altura uniforme */
+      object-fit: cover;    /* mantiene proporción, recorta si es necesario */
       border-radius: 10px;
       margin-bottom: 10px;
     }
@@ -127,64 +133,37 @@
       box-shadow: 0 0 10px #fff;
     }
 
-    /* Horarios modal */
-    #horariosModal .modal-content {
-      background: #111; /* fondo oscuro distinto */
-      padding: 25px;
-      border-radius: 15px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 0 20px #ff66cc, 0 0 35px #ff1493;
-    }
-
-    #horariosModal h2 {
-      margin-bottom: 20px;
-      font-size: 24px;
-      color: #ff99cc; /* título en rosado claro */
-      text-shadow: 0 0 8px #ff66cc;
-    }
-
-    #horariosModal button {
-      margin: 5px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    /* Botones de horarios */
-    #horariosModal .horario-btn {
-      background: #ff66cc; /* rosado suave */
-      color: #fff;
-    }
-
-    #horariosModal .horario-btn:hover {
-      background: #ff99cc;
-      box-shadow: 0 0 10px #fff;
-    }
-
-    /* Botón cerrar */
-    #horariosModal .cerrar-btn {
-      background: #ff1493; /* rosado intenso */
-      color: #fff;
-      margin-top: 15px;
-    }
-
-    #horariosModal .cerrar-btn:hover {
-      background: #ff4da6;
-      box-shadow: 0 0 12px #fff;
-    }
-
     /* Footer copyright */
     footer {
       text-align: center;
       padding: 15px;
       font-size: 14px;
-      color: red;
+      color: white;
       background: transparent;
       margin-top: 20px;
+    }
+    footer .marca {
+      color: red;
+      text-shadow: 0 0 5px red,
+                   0 0 10px red,
+                   0 0 20px #ff1a1a,
+                   0 0 40px #ff3333;
+      animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px red,
+                     0 0 10px red,
+                     0 0 20px #ff1a1a,
+                     0 0 40px #ff3333;
+      }
+      to {
+        text-shadow: 0 0 10px #ff4d4d,
+                     0 0 20px #ff6666,
+                     0 0 40px #ff1a1a,
+                     0 0 60px #ff0000;
+      }
     }
   </style>
 </head>
@@ -202,7 +181,7 @@
   <div id="welcomeModal" class="modal" style="display: none;">
     <div class="modal-content">
       <h2>🌸 Aquí encontrarás mis servicios disponibles 🌸</h2>
-      <p>Incluyendo toda la información y mis horarios disponibles.</p>
+      <p>Incluyendo toda la información.</p>
       <button onclick="cerrarModal()">Continuar</button>
     </div>
   </div>
@@ -232,7 +211,7 @@
     }
     window.cerrarModal = cerrarModal;
 
-    // Logo desde Firestore (colección config/logo)
+    // Logo desde Firestore
     async function cargarLogo() {
       const docRef = doc(db, "config", "logo");
       const docSnap = await getDoc(docRef);
@@ -245,6 +224,7 @@
     // Servicios
     async function cargarServicios() {
       const contenedor = document.getElementById("services");
+      contenedor.innerHTML = "";
       const querySnapshot = await getDocs(collection(db, "services"));
       querySnapshot.forEach(doc => {
         const data = doc.data();
@@ -254,43 +234,20 @@
           <img src="${data.image}" alt="${data.title}">
           <h3>${data.title}</h3>
           <p>💲 ${data.price} COP</p>
-          <button onclick="verHorarios('${doc.id}', '${data.title}')">𝐕𝐄𝐑 𝐇𝐎𝐑𝐀𝐑𝐈𝐎𝐒</button>
+          <button onclick="contactarWhatsApp('${data.title}')">𝐂𝐎𝐍𝐓𝐀𝐂𝐓𝐀𝐑 𝐖𝐇𝐀𝐓𝐒𝐀𝐏𝐏</button>
         `;
         contenedor.appendChild(div);
       });
     }
     cargarServicios();
 
-    async function verHorarios(serviceId, titulo) {
-      const horariosSnap = await getDocs(collection(db, `services/${serviceId}/schedules`));
-      let horarios = [];
-      horariosSnap.forEach(h => horarios.push(h.data().hora));
-
-      let opciones = horarios.map(h => `<button class="horario-btn" onclick="reservar('${titulo}','${h}')">${h}</button>`).join("<br>");
-
-      document.body.innerHTML += `
-        <div class="modal" id="horariosModal">
-          <div class="modal-content">
-            <h2>Horarios para ${titulo}</h2>
-            ${opciones}
-            <br>
-            <button class="cerrar-btn" onclick="cerrarHorarios()">Cerrar</button>
-          </div>
-        </div>`;
-    }
-    window.verHorarios = verHorarios;
-
-    function cerrarHorarios() {
-      document.getElementById("horariosModal").remove();
-    }
-    window.cerrarHorarios = cerrarHorarios;
-
-    function reservar(titulo, horario) {
+    // Redirigir a WhatsApp
+    function contactarWhatsApp(titulo) {
       const numero = "+573209964317";
-      const mensaje = encodeURIComponent(`Me interesa el servicio: ${titulo}. Quiero reservar para ${horario}. ¿Estarás disponible?`);
+      const mensaje = encodeURIComponent(`Me interesa ${titulo} ¿cuándo estarías disponible?`);
       window.open(`https://wa.me/${numero}?text=${mensaje}`, "_blank");
     }
-    window.reservar = reservar;
+    window.contactarWhatsApp = contactarWhatsApp;
 
     // Efecto estrellas
     const canvas = document.getElementById("starsCanvas");
@@ -339,9 +296,9 @@
     window.addEventListener("resize", resizeCanvas);
   </script>
 
-  <!-- Footer -->
-  <footer>
-    © 2024 - 2025 Creado por <strong>Luck X!T</strong>
-  </footer>
+<footer>
+  © 2024 - 2025 Creado por <strong class="marca">Luck X!T</strong>
+</footer>
+
 </body>
 </html>
