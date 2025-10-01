@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Stiled</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #111; color: #fff; }
+    header {
+      background: linear-gradient(135deg, #ff4da6, #ff66cc);
+      padding: 20px; text-align: center; font-size: 26px; font-weight: bold; color: white;
+      box-shadow: 0 0 25px #ff4da6, 0 0 40px #ff1aff;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff4da6, 0 0 20px #ff1aff; }
+      to { text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff4da6; }
+    }
+    nav { display: flex; justify-content: center; gap: 20px; padding: 15px; background: #222; }
+    nav button { padding: 10px 20px; border: none; border-radius: 10px; background: #ff1493; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    nav button:hover { background: #ff66cc; box-shadow: 0 0 15px #fff; }
+    section { display: none; padding: 20px; }
+    section.active { display: block; }
+    input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
+    input[type="text"] { background: #333; color: white; }
+    button.save { background: #ff1493; border: none; padding: 10px 15px; border-radius: 8px; color: white; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; }
+    button.save:hover { background: #ff66cc; box-shadow: 0 0 15px #fff; }
+    .card { background: #1c1c1c; border-radius: 15px; padding: 20px; margin: 10px 0; box-shadow: 0 0 15px rgba(255,20,147,0.4); }
+    .actions button { margin-right: 10px; padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .edit { background: #ff9800; color: #fff; }
+    .delete { background: #f44336; color: #fff; }
+    .copy { background: #2196f3; color: #fff; }
+
+    /* 🔔 Caja de notificaciones */
+    #notiBox {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255,20,147,0.6);
+      display: none;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ❓ Caja de confirmación */
+    #confirmBox {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(255,20,147,0.8);
+      display: none;
+      z-index: 2000;
+      text-align: center;
+    }
+    #confirmBox button {
+      margin: 10px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #confirmBox .yes { background: #f44336; color: #fff; }
+    #confirmBox .no { background: #2196f3; color: #fff; }
+
+    /* 📝 Caja de edición */
+    #editBox {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(255,20,147,0.8);
+      display: none;
+      z-index: 2000;
+      width: 300px;
+    }
+    #editBox input {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      background: #333;
+      color: #fff;
+    }
+    #editBox button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #ff1493;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>🌸 Panel de Administración 🌸</header>
+  <nav>
+    <button onclick="mostrarSeccion('publicaciones')">Publicaciones</button>
+    <button onclick="mostrarSeccion('config')">Configuración</button>
+  </nav>
+
+  <section id="publicaciones" class="active">
+    <h2>📸 Publicar Servicio</h2>
+    <div class="card">
+      <input type="text" id="title" placeholder="Título del servicio">
+      <input type="text" id="price" placeholder="Precio (COP)">
+      <input type="text" id="image" placeholder="URL de la imagen">
+      <button class="save" onclick="guardarServicio()">Guardar Servicio</button>
+    </div>
+    <h3>📋 Servicios Existentes</h3>
+    <div id="listaServicios"></div>
+  </section>
+
+  <section id="config">
+    <h2>⚙️ Configuración del Sitio</h2>
+    <div class="card">
+      <input type="text" id="siteTitle" placeholder="Título del sitio">
+      <input type="text" id="siteLogo" placeholder="URL del logo">
+      <button class="save" onclick="guardarConfig()">Guardar Configuración</button>
+    </div>
+  </section>
+
+  <!-- 🔔 Notificación -->
+  <div id="notiBox"></div>
+  <!-- ❓ Confirmación -->
+  <div id="confirmBox">
+    <p id="confirmMsg"></p>
+    <button class="yes">Sí</button>
+    <button class="no">No</button>
+  </div>
+  <!-- 📝 Edición -->
+  <div id="editBox">
+    <h3>✏️ Editar Servicio</h3>
+    <input type="text" id="editTitle" placeholder="Título">
+    <input type="text" id="editPrice" placeholder="Precio">
+    <input type="text" id="editImage" placeholder="Imagen URL">
+    <button onclick="guardarEdicion()">Guardar Cambios</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkaKp-nUwDb4O-UlLfbwuOoYSsOcwLw54",
+      authDomain: "stilod-6e486.firebaseapp.com",
+      projectId: "stilod-6e486",
+      storageBucket: "stilod-6e486.firebasestorage.app",
+      messagingSenderId: "141492601635",
+      appId: "1:141492601635:web:ae08e8f7b479b795a6c296"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 🔔 Notificación
+    function showNoti(msg) {
+      const box = document.getElementById("notiBox");
+      box.innerText = msg;
+      box.style.display = "block";
+      setTimeout(() => { box.style.display = "none"; }, 3000);
+    }
+
+    // ❓ Confirmación
+    function showConfirm(msg) {
+      return new Promise(resolve => {
+        const confirmBox = document.getElementById("confirmBox");
+        const confirmMsg = document.getElementById("confirmMsg");
+        confirmMsg.innerText = msg;
+        confirmBox.style.display = "block";
+        confirmBox.querySelector(".yes").onclick = () => {
+          confirmBox.style.display = "none";
+          resolve(true);
+        };
+        confirmBox.querySelector(".no").onclick = () => {
+          confirmBox.style.display = "none";
+          resolve(false);
+        };
+      });
+    }
+
+    // 📝 Edición
+    let editId = null;
+    function editarServicio(id, title, price, image) {
+      editId = id;
+      document.getElementById("editTitle").value = title;
+      document.getElementById("editPrice").value = price;
+      document.getElementById("editImage").value = image;
+      document.getElementById("editBox").style.display = "block";
+    }
+    window.editarServicio = editarServicio;
+
+    async function guardarEdicion() {
+      const nuevoTitulo = document.getElementById("editTitle").value;
+      const nuevoPrecio = document.getElementById("editPrice").value;
+      const nuevaImagen = document.getElementById("editImage").value;
+      if (editId && nuevoTitulo && nuevoPrecio && nuevaImagen) {
+        await updateDoc(doc(db, "services", editId), {
+          title: nuevoTitulo,
+          price: nuevoPrecio,
+          image: nuevaImagen
+        });
+        document.getElementById("editBox").style.display = "none";
+        showNoti("✅ Servicio actualizado");
+        cargarServicios();
+      }
+    }
+    window.guardarEdicion = guardarEdicion;
+
+    function mostrarSeccion(id) {
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if (id === "publicaciones") cargarServicios();
+    }
+    window.mostrarSeccion = mostrarSeccion;
+
+    async function guardarServicio() {
+      const title = document.getElementById("title").value;
+      const price = document.getElementById("price").value;
+      const image = document.getElementById("image").value.trim();
+      const docRef = await addDoc(collection(db, "services"), { title, price, image });
+      showNoti("✅ Servicio guardado con ID: " + docRef.id);
+      cargarServicios();
+    }
+    window.guardarServicio = guardarServicio;
+
+    async function cargarServicios() {
+      const lista = document.getElementById("listaServicios");
+      lista.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "services"));
+      querySnapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const safeImg = data.image.startsWith("http") ? data.image : "";
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <p><b>${data.title}</b> - $${data.price}</p>
+          ${safeImg ? `<img src="${safeImg}" alt="img" style="max-width:100px;border-radius:8px">` : "<small>⚠️ Sin imagen válida</small>"}<br>
+          <small>ID: ${docSnap.id}</small>
+          <div class="actions">
+            <button class="edit" onclick="editarServicio('${docSnap.id}', '${data.title}', '${data.price}', '${data.image}')">Editar</button>
+            <button class="delete" onclick="eliminarServicio('${docSnap.id}')">Eliminar</button>
+            <button class="copy" onclick="copiarID('${docSnap.id}')">Copiar ID</button>
+          </div>
+        `;
+        lista.appendChild(card);
+      });
+    }
+    window.cargarServicios = cargarServicios;
+
+    async function eliminarServicio(id) {
+      const ok = await showConfirm("¿Seguro que deseas eliminar este servicio?");
+      if (ok) {
+        await deleteDoc(doc(db, "services", id));
+        showNoti("🗑️ Servicio eliminado");
+        cargarServicios();
+      }
+    }
+    window.eliminarServicio = eliminarServicio;
+
+    function copiarID(id) {
+      navigator.clipboard.writeText(id);
+      showNoti("📋 ID copiado: " + id);
+    }
+    window.copiarID = copiarID;
+
+    async function guardarConfig() {
+      const siteTitle = document.getElementById("siteTitle").value;
+      const siteLogo = document.getElementById("siteLogo").value;
+      await setDoc(doc(db, "settings", "site"), { siteTitle, siteLogo });
+      showNoti("✅ Configuración guardada");
+    }
+    window.guardarConfig = guardarConfig;
+
+    // cargar al inicio
+    cargarServicios();
+  </script>
+</body>
+</html>
